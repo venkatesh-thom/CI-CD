@@ -56,3 +56,11 @@ PLATFORM=$(uname -s)_$ARCH
 curl -sLO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_$PLATFORM.tar.gz"
 tar -xzf eksctl_$PLATFORM.tar.gz -C /tmp && rm eksctl_$PLATFORM.tar.gz
 sudo install -m 0755 /tmp/eksctl /usr/local/bin && rm /tmp/eksctl
+
+
+#install k9s
+cd /tmp
+wget https://github.com/derailed/k9s/releases/download/v0.50.16/k9s_Linux_amd64.tar.gz
+sudo tar -xvf k9s_Linux_amd64.tar.gz
+sudo mv k9s /usr/local/bin/
+sudo rm -rf k9s_Linux_amd64.tar.gz

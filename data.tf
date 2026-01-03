@@ -42,8 +42,32 @@ data "aws_ami" "sonarqube" {
 }
 
 
-# If you created the VPC/subnet manually in AWS, import it logically:
+#to get default vp
+data "aws_vpc" "default_vpc" {
+  default = true
 
-data "aws_subnet" "jenkins" {
-  id = "subnet-01a62adfcf85ac2be"
+  # Optional: Add a second filter just to be explicit
+  filter {
+    name   = "is-default"
+    values = ["true"]
+  }
 }
+
+#to get default subnet
+data "aws_subnet" "default_subnet" {
+  vpc_id            = data.aws_vpc.default_vpc.id
+  default_for_az    = true
+  availability_zone = "us-east-1a"
+}
+
+#to get default security group
+data "aws_security_group" "default_sg" {
+  vpc_id = data.aws_vpc.default_vpc.id
+
+  # The filter targets the SG named 'default' in the VPC.
+  filter {
+    name   = "group-name"
+    values = ["default"]
+  }
+}
+
