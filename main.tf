@@ -4,7 +4,6 @@ resource "aws_instance" "jenkins" {
   instance_type          = "t3.small"
   vpc_security_group_ids = [aws_security_group.main.id]
   subnet_id              = "subnet-01a62adfcf85ac2be" #replace your Subnet in default VPC
-  iam_instance_profile   = aws_iam_instance_profile.jenkins.name
   # need more for terraform
   root_block_device {
     volume_size = 50
@@ -39,33 +38,34 @@ resource "aws_instance" "jenkins_agent" {
   )
 }
 
-resource "aws_instance" "sonar" {
-  count                  = var.sonar ? 1 : 0
-  ami                    = local.sonar_ami_id
-  instance_type          = "t3.large"
-  vpc_security_group_ids = [aws_security_group.main.id]
-  subnet_id              = "subnet-01a62adfcf85ac2be" #replace your Subnet in default VPC
-  key_name               = "daws-86s"
-  iam_instance_profile   = aws_iam_instance_profile.jenkins.name
-  # need more for terraform
-  root_block_device {
-    volume_size = 20
-    volume_type = "gp3" # or "gp2", depending on your preference
-  }
-  user_data = file("sonar.sh")
-  tags = merge(
-    local.common_tags,
-    {
-      Name = "${var.project}-${var.environment}-sonar"
-    }
-  )
-}
+
+# resource "aws_instance" "sonar" {
+#   count                  = var.sonar ? 1 : 0
+#   ami                    = data.aws_ami.rhel9.id
+#   instance_type          = "t3.large"
+#   vpc_security_group_ids = [aws_security_group.main.id]
+#   subnet_id              = "subnet-01a62adfcf85ac2be"
+#   #key_name               = "daws-86s"
+#   iam_instance_profile = aws_iam_instance_profile.jenkins.name
+
+#   root_block_device {
+#     volume_size = 30
+#     volume_type = "gp3"
+#   }
+
+#   user_data = file("sonar.sh")
+
+#   tags = merge(
+#     local.common_tags,
+#     {
+#       Name = "${var.project}-${var.environment}-sonar"
+#     }
+#   )
+# }
 
 
-resource "aws_iam_instance_profile" "jenkins" {
-  name = "jenkins"
-  role = "BastionTerraformAdmin"
-}
+
+
 
 resource "aws_security_group" "main" {
   name        = "${var.project}-${var.environment}-jenkins"
@@ -123,10 +123,4 @@ resource "aws_route53_record" "jenkins-agent" {
   allow_overwrite = true
 }
 
-resource "aws_vpc_security_group_ingress_rule" "allow_all_ingress" {
-  ip_protocol       = "tcp"
-  from_port         = 22
-  to_port           = 22
-  cidr_ipv4         = "0.0.0.0/0"
-  security_group_id = local.security_group_id
-}
+
