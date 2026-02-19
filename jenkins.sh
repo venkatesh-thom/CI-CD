@@ -1,24 +1,52 @@
 #!/bin/bash
 
-#resize disk from 20GB to 50GB
+set -e
+
+# =========================
+# Disk Resize
+# =========================
+
+# Grow partition
 growpart /dev/nvme0n1 4
 
-lvextend -L +10G /dev/mapper/RootVG-varVol
-lvextend -L +10G /dev/mapper/RootVG-rootVol
-lvextend -l +100%FREE /dev/mapper/RootVG-homeVol
+# Resize LVM physical volume (IMPORTANT)
+pvresize /dev/nvme0n1p4
 
-xfs_growfs /
-xfs_growfs /var
-xfs_growfs /home
+# Extend logical volumes and auto-resize filesystem
+lvextend -r -L +10G /dev/mapper/RootVG-varVol
+lvextend -r -L +10G /dev/mapper/RootVG-rootVol
+lvextend -r -l +100%FREE /dev/mapper/RootVG-homeVol
 
 
+# =========================
+# Install Java 21
+# =========================
 
-curl -o /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
+dnf install -y curl fontconfig java-21-openjdk
+
+
+# =========================
+# Install Jenkins
+# =========================
+
+curl -fsSL https://pkg.jenkins.io/redhat-stable/jenkins.repo \
+-o /etc/yum.repos.d/jenkins.repo
+
 rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
-yum install fontconfig java-21-openjdk -y
-yum install jenkins -y
+
+dnf clean all
+dnf makecache
+
+dnf install -y jenkins
+
 systemctl daemon-reload
 systemctl enable jenkins
 systemctl start jenkins
+
+
+
+
+
+
 
 
