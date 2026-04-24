@@ -3,7 +3,7 @@ resource "aws_instance" "jenkins" {
   ami                    = local.ami_id
   instance_type          = "t3.small"
   vpc_security_group_ids = [aws_security_group.main.id]
-  subnet_id              = "subnet-01a62adfcf85ac2be" #replace your Subnet in default VPC
+  subnet_id              = "subnet-0ad3a786fedff2a06" #replace your Subnet in default VPC
   # need more for terraform
   root_block_device {
     volume_size = 50
@@ -22,7 +22,7 @@ resource "aws_instance" "jenkins_agent" {
   ami                    = local.ami_id
   instance_type          = "t3.small"
   vpc_security_group_ids = [aws_security_group.main.id]
-  subnet_id              = "subnet-01a62adfcf85ac2be" #replace your Subnet
+  subnet_id              = "subnet-0ad3a786fedff2a06" #replace your Subnet in default VPC
   # need more for terraform
   root_block_device {
     volume_size = 50
