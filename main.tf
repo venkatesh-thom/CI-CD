@@ -9,7 +9,7 @@ resource "aws_instance" "jenkins" {
     volume_size = 50
     volume_type = "gp3" # or "gp2", depending on your preference
   }
-  user_data = file("jenkins.sh")
+  user_data = file("jenkins-master.sh")
   tags = merge(
     local.common_tags,
     {
@@ -79,9 +79,17 @@ resource "aws_security_group" "main" {
   }
 
   ingress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
+    from_port        = 8080
+    to_port          = 8080
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  ingress {
+    from_port        = 22
+    to_port          = 22
+    protocol         = "tcp"
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
@@ -94,9 +102,9 @@ resource "aws_security_group" "main" {
   )
 }
 
-resource "aws_route53_record" "jenkins" {
+resource "aws_route53_record" "jenkins-master" {
   zone_id         = var.zone_id
-  name            = "jenkins.${var.zone_name}"
+  name            = "jenkins-master.${var.zone_name}"
   type            = "A"
   ttl             = 1
   records         = [aws_instance.jenkins.public_ip]
