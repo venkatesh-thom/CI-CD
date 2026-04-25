@@ -1,36 +1,48 @@
 #!/bin/bash
+set -e
 
-# Resize disk
-growpart /dev/nvme0n1 4
+# =========================
+# Disk Resize
+# =========================
 
-lvextend -L +10G /dev/mapper/RootVG-varVol
-lvextend -L +10G /dev/mapper/RootVG-rootVol
-lvextend -l +100%FREE /dev/mapper/RootVG-homeVol
+dnf install -y cloud-utils-growpart
 
-xfs_growfs /
-xfs_growfs /var
-xfs_growfs /home
+growpart /dev/nvme0n1 4 || true
+pvresize /dev/nvme0n1p4 || true
 
-# Jenkins setup
-sudo curl -o /etc/yum.repos.d/jenkins.repo \
-   https://pkg.jenkins.io/rpm-stable/jenkins.repo
+lvextend -r -L +10G /dev/mapper/RootVG-varVol || true
+lvextend -r -L +10G /dev/mapper/RootVG-rootVol || true
+lvextend -r -l +100%FREE /dev/mapper/RootVG-homeVol || true
 
-sudo rpm --import https://pkg.jenkins.io/rpm-stable/jenkins.io-2023.key
 
-sudo dnf install fontconfig java-21-openjdk -y
+# =========================
+# Install Java + Jenkins
+# =========================
 
-# ✅ Install Jenkins (missing step)
-sudo dnf install jenkins -y
+dnf install -y curl fontconfig java-21-openjdk
 
-sudo systemctl daemon-reload
-sudo systemctl start jenkins
-sudo systemctl enable jenkins
-sudo systemctl status jenkins
+curl -o /etc/yum.repos.d/jenkins.repo \
+https://pkg.jenkins.io/rpm-stable/jenkins.repo
 
+rpm --import https://pkg.jenkins.io/rpm-stable/jenkins.io-2023.key
+
+dnf install -y jenkins
+
+systemctl daemon-reload
+systemctl enable jenkins
+systemctl start jenkins
+
+
+# =========================
 # Install Docker
+# =========================
+
 dnf -y install dnf-plugins-core
 dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker-ce.repo
+
 dnf install -y docker-ce docker-ce-cli containerd.io
-systemctl start docker
+
 systemctl enable docker
+systemctl start docker
+
 usermod -aG docker ec2-user

@@ -1,28 +1,22 @@
 #!/bin/bash
-
 set -e
 
 # =========================
 # Disk Resize
 # =========================
 
-# Install growpart if missing
 dnf install -y cloud-utils-growpart
 
-# Grow partition
-growpart /dev/nvme0n1 4
+growpart /dev/nvme0n1 4 || true
+pvresize /dev/nvme0n1p4 || true
 
-# Resize LVM physical volume
-pvresize /dev/nvme0n1p4
-
-# Extend logical volumes + filesystem
-lvextend -r -L +10G /dev/mapper/RootVG-varVol
-lvextend -r -L +10G /dev/mapper/RootVG-rootVol
-lvextend -r -l +100%FREE /dev/mapper/RootVG-homeVol
+lvextend -r -L +10G /dev/mapper/RootVG-varVol || true
+lvextend -r -L +10G /dev/mapper/RootVG-rootVol || true
+lvextend -r -l +100%FREE /dev/mapper/RootVG-homeVol || true
 
 
 # =========================
-# Install Java
+# Install Java + tools
 # =========================
 
 dnf install -y curl fontconfig java-21-openjdk
@@ -32,13 +26,10 @@ dnf install -y curl fontconfig java-21-openjdk
 # Install Jenkins
 # =========================
 
-curl -fsSL https://pkg.jenkins.io/redhat-stable/jenkins.repo \
+curl -fsSL https://pkg.jenkins.io/rpm-stable/jenkins.repo \
 -o /etc/yum.repos.d/jenkins.repo
 
-rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
-
-dnf clean all
-dnf makecache
+rpm --import https://pkg.jenkins.io/rpm-stable/jenkins.io-2023.key
 
 dnf install -y jenkins
 
