@@ -6,20 +6,23 @@ set -e
 # Disk Resize
 # =========================
 
+# Install growpart if missing
+dnf install -y cloud-utils-growpart
+
 # Grow partition
 growpart /dev/nvme0n1 4
 
-# Resize LVM physical volume (IMPORTANT)
+# Resize LVM physical volume
 pvresize /dev/nvme0n1p4
 
-# Extend logical volumes and auto-resize filesystem
+# Extend logical volumes + filesystem
 lvextend -r -L +10G /dev/mapper/RootVG-varVol
 lvextend -r -L +10G /dev/mapper/RootVG-rootVol
 lvextend -r -l +100%FREE /dev/mapper/RootVG-homeVol
 
 
 # =========================
-# Install Java 21
+# Install Java
 # =========================
 
 dnf install -y curl fontconfig java-21-openjdk
@@ -42,11 +45,3 @@ dnf install -y jenkins
 systemctl daemon-reload
 systemctl enable jenkins
 systemctl start jenkins
-
-
-
-
-
-
-
-
