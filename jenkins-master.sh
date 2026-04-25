@@ -27,7 +27,7 @@ dnf install -y curl fontconfig java-21-openjdk
 # =========================
 
 curl -fsSL https://pkg.jenkins.io/rpm-stable/jenkins.repo \
--o /etc/yum.repos.d/jenkins.repo
+ -o /etc/yum.repos.d/jenkins.repo
 
 rpm --import https://pkg.jenkins.io/rpm-stable/jenkins.io-2023.key
 
