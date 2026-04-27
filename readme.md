@@ -8,6 +8,22 @@ It automates the provisioning of:
 * Jenkins Agent(s)
 * SonarQube (for code quality analysis)
 
+#### Plugins:
+* Stage view
+* AWS Steps
+* SonarQube scanner
+* Pipeline utility steps
+
+#### Master Agent Architecture
+* Create credentials to connect agent
+* Install Java in agent
+* Select Non verification strategy
+
+#### Credentials
+* SSH authentication
+* AWS credentials
+* Sonar token
+
 ---
 
 ## 🧱 Architecture Overview
@@ -198,5 +214,4 @@ Jenkins-remove.md
 * 🔄 Scalable build system
 
 ---
-
 
